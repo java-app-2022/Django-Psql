@@ -1,0 +1,23 @@
+version: 0.2
+    
+phases:
+  install:
+    runtime-versions:
+      nodejs: latest
+    commands:
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 7) 
+  pre_build:
+    commands:
+      - echo Entered the pre_build phase...
+  build:
+    commands:
+      - echo Entered the build phase...
+      - echo Building the Docker image...
+      - docker build -t python .
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 258706517898.dkr.ecr.us-east-1.amazonaws.com
+      - docker tag python:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMIT_HASH
+  post_build:
+    commands:
+      - echo Entered the post_build phase...
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMIT_HASH
