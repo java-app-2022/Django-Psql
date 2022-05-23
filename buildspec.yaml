@@ -9,15 +9,25 @@ phases:
   pre_build:
     commands:
       - echo Entered the pre_build phase...
+      - chmod a+x image.sh
   build:
     commands:
       - echo Entered the build phase...
       - echo Building the Docker image...
       - docker build -t python .
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 258706517898.dkr.ecr.us-east-1.amazonaws.com
-      - docker tag python:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMIT_HASH
+      - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 796638590183.dkr.ecr.us-east-2.amazonaws.com
+      - docker build -t kanban-app .
+      - docker tag kanban-app:latest 796638590183.dkr.ecr.us-east-2.amazonaws.com/kanban-app:$COMMIT_HASH
   post_build:
     commands:
       - echo Entered the post_build phase...
       - echo Pushing the Docker image...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMIT_HASH
+      - docker push 796638590183.dkr.ecr.us-east-2.amazonaws.com/kanban-app:$COMMIT_HASH
+      - sh image.sh
+artifacts:
+ files:
+   - taskdef.json
+   - appspec.yml
+   - imageDetail.json
+
+ discard-paths: yes
